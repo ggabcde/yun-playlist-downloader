@@ -4,7 +4,9 @@
 	"compilerOptions": {
 		"target": "es6",
 		"module": "commonjs",
-		"allowSyntheticDefaultImports": true
+		"outDir": "./js",
+		"allowJs": true
+		// "allowSyntheticDefaultImports": true
 	},
 	"exclude": [
 		"node_modules",
@@ -12,5 +14,8 @@
 		"jspm_packages",
 		"tmp",
 		"temp"
+	],
+	"include": [
+		"./ts/**/*"
 	]
 }
