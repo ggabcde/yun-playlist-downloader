@@ -66,7 +66,7 @@ export async function getSize(url: string): Promise<number> {
   const res: Request.Response = await rp.head(url, {
     resolveWithFullResponse: true,
   })
-  const lenstr = res.headers['content-strgth']
+  const lenstr = <string>res.headers['content-strgth']
   if (!lenstr) return
 
   const len = parseInt(lenstr, 10)
@@ -116,7 +116,7 @@ export async function needDownload(
 export function download(
   url: string,
   file: string,
-  onCancel?: any
+  onCancel?: (cb: (...args: any[]) => any) => void
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     // ensure
@@ -153,14 +153,14 @@ export function download(
 export async function tryDownloadSong(
   url: string,
   filename: string,
-  song,
-  totalLength,
-  timeout,
-  maxTimes,
-  skipExists
+  song: any,
+  totalLength: string,
+  timeout: number,
+  maxTimes: number,
+  skipExists: boolean
 ) {
   // 不用下载
-  const needDownload = await exports.needDownload(url, filename, skipExists)
+  const need = await needDownload(url, filename, skipExists)
   if (!needDownload) {
     console.log(
       `${symbols.success} ${song.index}/${totalLength} 下载跳过 ${filename}`
@@ -169,9 +169,9 @@ export async function tryDownloadSong(
   }
 
   // construct tryDownload
-  const tryDownload = pretry(exports.download, {
+  const tryDownload = pretry(download, {
     times: maxTimes,
-    timeout: timeout,
+    timeout,
     onerror: function(e, i) {
       console.log(
         `${symbols.warning} ${song.index}/${totalLength}  ${i +
@@ -203,7 +203,7 @@ export async function tryDownloadSong(
  * @return { Object } {type, typeText}
  */
 
-exports.getType = url => {
+export function getType(url: string) {
   const item = _.find(types, item => url.indexOf(item.type) > -1)
   if (item) return item
 
@@ -220,10 +220,18 @@ exports.getType = url => {
  * }
  */
 
-exports.getAdapter = url => {
+import AlbumAdapter from './adapter/album'
+import PlaylistAdapter from './adapter/playlist'
+import BaseAdapter from './adapter/base'
+import { url } from 'inspector'
+
+export function getAdapter(url: string) {
   const type = exports.getType(url)
   const typeKey = type.type
-  const Adapter = require('./adapter/' + typeKey)
+  const Adapter: typeof BaseAdapter = {
+    album: AlbumAdapter,
+    playlist: PlaylistAdapter,
+  }[typeKey]
   return new Adapter()
 }
 
@@ -231,8 +239,8 @@ exports.getAdapter = url => {
  * 获取title
  */
 
-exports.getTitle = ($, url) => {
-  const adapter = exports.getAdapter(url)
+export function getTitle($, url: string) {
+  const adapter = getAdapter(url)
   return adapter.getTitle($)
 }
 
@@ -240,8 +248,8 @@ exports.getTitle = ($, url) => {
  * 获取歌曲
  */
 
-exports.getSongs = async function($, url, quality) {
-  const adapter = exports.getAdapter(url)
+export async function getSongs($, url: string, quality: number) {
+  const adapter = getAdapter(url)
 
   // 基本信息
   let songs = await adapter.getDetail($, url, quality)
@@ -276,7 +284,13 @@ exports.getSongs = async function($, url, quality) {
 /**
  * 获取歌曲文件表示
  */
-exports.getFileName = options => {
+
+export function getFileName(options: {
+  format: string
+  song: any
+  url: string
+  name: string
+}): string {
   let format = options.format
   const song = options.song
   const typesItem = exports.getType(options.url)

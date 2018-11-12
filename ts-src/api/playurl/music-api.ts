@@ -1,16 +1,15 @@
-'use strict'
-/* eslint camelcase: off */
+import _ from 'lodash'
+import rp from 'request-promise'
+import Debug from 'debug'
+import { aesRsaEncrypt as encrypt } from '@magicdawn/music-api/src/crypto'
 
-const _ = require('lodash')
-const rp = require('request-promise')
-const debug = require('debug')('yun:api:playurl:music-api')
-const encrypt = require('@magicdawn/music-api/src/crypto').aesRsaEncrypt
+const debug = Debug('yun:api:playurl:music-api')
 
 /**
  * getData
  */
 
-module.exports = async function(ids, quality) {
+export default async function(ids, quality) {
   if (!ids || !ids.length) return
   quality = quality || 320000 // 320 | 192 | 128
 

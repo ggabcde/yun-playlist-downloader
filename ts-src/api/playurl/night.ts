@@ -1,27 +1,27 @@
-'use strict'
-/* eslint camelcase: off */
+import Nightmare from 'nightmare'
+import _ from 'lodash'
+import RequestPromise from 'request-promise'
+import Debug from 'debug'
+import {CHROME_UA} from '../../hack/index'
 
-const Nightmare = require('nightmare')
-const _ = require('lodash')
-const rp = require('request-promise').defaults({ jar: true })
-const debug = require('debug')('yun:api:playurl:nightmare')
-const CHROME_UA = require('../../hack/index.js').CHROME_UA
+const rp = RequestPromise.defaults({ jar: true })
+const debug = Debug('yun:api:playurl:nightmare')
 
 /**
  * getData
  */
 
-module.exports = async function(ids, quality) {
+export default async function(ids: number[], quality: number = 320000) {
   if (!ids || !ids.length) return
-  quality = quality || 320000 // 320 | 192 | 128
+  quality = quality // 320 | 192 | 128
 
   // bl
-  let bl = {
+  const bl = {
     br: quality,
     csrf_token: '',
     ids: JSON.stringify(ids),
   }
-  bl = JSON.stringify(bl)
+  const blStr = JSON.stringify(bl)
 
   // args
   const defaultArgs = [
@@ -35,8 +35,8 @@ module.exports = async function(ids, quality) {
     '0CoJUm6Qyw8W8jud',
   ]
   const args = _.cloneDeep(defaultArgs)
-  args.unshift(bl)
-  const night = Nightmare()
+  args.unshift(blStr)
+  const night = new Nightmare()
 
   let body
   let err

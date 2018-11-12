@@ -1,17 +1,18 @@
-const { parse: urlparse } = require('url')
-const { parse: qsparse } = require('querystring')
-const { extname } = require('path')
-const { padStart, trimStart } = require('lodash')
-const debug = require('debug')('yun:adapter:base')
+import { parse as urlparse } from 'url'
+import { parse as qsparse } from 'querystring'
+import { extname } from 'path'
+import { padStart, trimStart } from 'lodash'
+import Debug from 'debug'
 
+const debug = Debug('yun:adapter:base')
 const NOT_IMPLEMENTED = 'not NOT_IMPLEMENTED'
 
-module.exports = class BaseAdapter {
+export default class BaseAdapter {
   /**
    * get title for a page
    */
 
-  getTitle($) {
+  getTitle($: CheerioAPI) {
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -19,14 +20,14 @@ module.exports = class BaseAdapter {
    * get detail
    */
 
-  getDetail($, url, quality) {
+  getDetail($: CheerioAPI, url: string, quality: number) {
     throw new Error(NOT_IMPLEMENTED)
   }
 
-  getId(url) {
+  getId(url: string): string {
     const parsedUrl = urlparse(url)
     const parsedQuery = qsparse(parsedUrl.query)
-    const { id } = parsedQuery
+    const id = <string>parsedQuery.id
     debug('id = %s', id)
     return id
   }
