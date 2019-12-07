@@ -1,14 +1,15 @@
 {
-  "include": ["@types/**/*.ts", "./src/**/*.ts"],
+  "include": ["./ts-src/**/*.ts"],
+  "exclude": ["ts-src/api/encrypt/nightmare.ts"],
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "*": ["./@types/*", "*"]
+      "*": ["./ts-src/@types/*", "*"]
     },
-    "typeRoots": ["./@types", "./node_modules/@types"],
+    "typeRoots": ["./ts-src/@types", "./node_modules/@types"],
     "allowJs": true,
     "module": "commonjs",
-    "outDir": "js-lib",
+    "outDir": "ts-build",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "target": "ES2018",
