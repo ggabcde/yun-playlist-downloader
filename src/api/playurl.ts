@@ -2,7 +2,7 @@
 
 import _ from 'lodash'
 import Debug from 'debug'
-import {umi} from '../singleton.js'
+import {umi} from '../singleton'
 
 const debug = Debug('yun:api:playurl:music-api')
 
@@ -10,9 +10,9 @@ const debug = Debug('yun:api:playurl:music-api')
  * getData
  */
 
-export default async function(ids: string[], quality: string) {
+export default async function(ids: string[], quality: number) {
   if (!ids || !ids.length) return
-  quality = quality || '320000' // 320 | 192 | 128
+  quality = quality || 320000 // 320 | 192 | 128
 
   // bl
   let bl = {

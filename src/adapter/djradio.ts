@@ -2,8 +2,8 @@ import API from '@magicdawn/music-api'
 import debugFactory from 'debug'
 import pmap from 'promise.map'
 import BaseAdapter, {Song} from './base'
-import {normalizeUrl, getId} from '../util.js'
-import programDetail from '../api/program-detail.js'
+import {normalizeUrl, getId} from '../util'
+import programDetail from '../api/program-detail'
 
 const debug = debugFactory('yun:adapter:djradio')
 
@@ -25,11 +25,11 @@ export interface DjSong extends Song {
 }
 
 export default class DjradioAdapter extends BaseAdapter {
-  getTitle($: CheerioAPI) {
+  getTitle($: CheerioStatic) {
     return $('h2.f-ff2').text()
   }
 
-  async getDetail($: CheerioAPI, url: string, quality: string) {
+  async getDetail($: CheerioStatic, url: string, quality: number) {
     const text = $('#radio-data').text()
 
     const $rows = $('.m-table.m-table-program tr')

@@ -1,7 +1,7 @@
 import {extname} from 'path'
 import {padStart, trimStart, get} from 'lodash'
 import debugFactory from 'debug'
-import {getId} from '../util.js'
+import {getId} from '../util'
 
 const debug = debugFactory('yun:adapter:base')
 const NOT_IMPLEMENTED = 'not NOT_IMPLEMENTED'
@@ -10,7 +10,17 @@ export interface Song {
   ar?: [{name: string}]
   artists?: [{name: string}]
   name: string
-  ajaxData: any
+  ajaxData?: any
+}
+
+export interface TransformSong {
+  singer: string
+  songName: string
+  url: string
+  ext: string
+  index: string
+  rawIndex: number
+  raw: Song
 }
 
 export default class BaseAdapter {
@@ -18,7 +28,7 @@ export default class BaseAdapter {
    * get title for a page
    */
 
-  getTitle($: CheerioAPI): string {
+  getTitle($: CheerioStatic): string {
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -26,7 +36,7 @@ export default class BaseAdapter {
    * get detail
    */
 
-  getDetail($: CheerioAPI, url: string, quality: string): any {
+  getDetail($: CheerioStatic, url: string, quality: number): any {
     throw new Error(NOT_IMPLEMENTED)
   }
 
@@ -44,7 +54,7 @@ export default class BaseAdapter {
     const len = String(songs.length).length
 
     return songs.map(function(song, index) {
-      return {
+      const trasformed: TransformSong = {
         // 歌手
         singer:
           (get(song, 'ar.0.name') as string) ||
@@ -68,6 +78,7 @@ export default class BaseAdapter {
         // raw
         raw: song,
       }
+      return trasformed
     })
   }
 }

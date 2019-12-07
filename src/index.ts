@@ -6,8 +6,8 @@ import debugFactory from 'debug'
 import pretry from 'promise.retry'
 import sanitize from 'filenamify'
 import dl from 'dl-vampire'
-import getPlayurl from './api/playurl.js'
-import BaseAdapter, {Song} from './adapter/base'
+import getPlayurl from './api/playurl'
+import BaseAdapter, {Song, TransformSong} from './adapter/base'
 
 const debug = debugFactory('yun:index')
 
@@ -15,7 +15,7 @@ const debug = debugFactory('yun:index')
  * page type
  */
 
-const types = (exports.types = [
+export const types = [
   {
     type: 'playlist',
     typeText: '列表',
@@ -28,13 +28,13 @@ const types = (exports.types = [
     type: 'djradio',
     typeText: '电台',
   },
-])
+]
 
 /**
  * 下载一首歌曲
  */
 
-export async function downloadSong(options: downloadSong.Options = {}) {
+export async function downloadSong(options: downloadSong.Options) {
   const progress: boolean = options.progress
   if (progress) {
     return downloadSongWithProgress(options)
@@ -48,8 +48,8 @@ export namespace downloadSong {
 
     url: string
     file: string
-    song: Song
-    totalLength: string
+    song: TransformSong
+    totalLength: number
     retryTimeout?: number
     retryTimes?: number
     skipExists?: boolean
@@ -134,7 +134,7 @@ async function downloadSongWithProgress(options: downloadSong.Options) {
   success()
 }
 
-exports.downloadSongPlain = async function(options) {
+export async function downloadSongPlain(options: downloadSong.Options) {
   const {
     url,
     file,
@@ -176,9 +176,6 @@ exports.downloadSongPlain = async function(options) {
 
 /**
  * check page type
- *
- * @param { String } url
- * @return { Object } {type, typeText}
  */
 
 export function getType(url: string) {
@@ -198,9 +195,9 @@ export function getType(url: string) {
  */
 
 export function getAdapter(url: string): BaseAdapter {
-  const type = exports.getType(url)
+  const type = getType(url)
   const typeKey = type.type
-  const Adapter = require('./adapter/' + typeKey)
+  const Adapter = require('./adapter/' + typeKey).default
   return new Adapter()
 }
 
@@ -208,7 +205,7 @@ export function getAdapter(url: string): BaseAdapter {
  * 获取title
  */
 
-export function getTitle($: CheerioAPI, url: string) {
+export function getTitle($: CheerioStatic, url: string) {
   const adapter = getAdapter(url)
   return adapter.getTitle($)
 }
@@ -217,7 +214,7 @@ export function getTitle($: CheerioAPI, url: string) {
  * 获取歌曲
  */
 
-export async function getSongs($: CheerioAPI, url: string, quality: string) {
+export async function getSongs($: CheerioStatic, url: string, quality: number) {
   const adapter = getAdapter(url)
 
   // 基本信息
@@ -255,7 +252,7 @@ export async function getSongs($: CheerioAPI, url: string, quality: string) {
  */
 export function getFileName(options: getFileName.Options) {
   let {format, url, song, name} = options
-  const typesItem = exports.getType(url)
+  const typesItem = getType(url)
 
     // 从 type 中取值, 先替换 `长的`
   ;['typeText', 'type'].forEach(t => {
@@ -296,7 +293,7 @@ export function getFileName(options: getFileName.Options) {
 export namespace getFileName {
   export interface Options {
     format: string
-    song: Song
+    song: TransformSong
     url: string
 
     // 专辑 or playlist 名称

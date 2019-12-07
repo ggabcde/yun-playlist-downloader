@@ -49,7 +49,7 @@
     "promise.map": "^0.0.2",
     "promise.retry": "^0.2.0",
     "rc": "^1.2.1",
-    "umi-request": "^1.2.11",
+    "umi-request": "^1.2.12",
     "yargs": "^15.0.2"
   },
   "optionalDependencies": {

@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import Debug from 'debug'
-import {umi} from '../singleton.js'
+import {umi} from '../singleton'
 
 const debug = Debug('yun:api:program-detail')
 const debugDetail = Debug('yun-detail:api:program-detail')

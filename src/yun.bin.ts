@@ -23,6 +23,17 @@ if (process.argv.some(s => s.match(/djradio/))) {
   DEFAULT_FORMAT = ':name/:programDate 第:programOrder期 - :songName.:ext'
 }
 
+interface CurrentArgv {
+  url: string
+  concurrency: number
+  format: string
+  quality: number
+  retryTimeout: number
+  retryTimes: number
+  skipExists: boolean
+  progress: boolean
+}
+
 // get config
 const config = require('rc')('yun', {
   'concurrency': 5,
@@ -30,11 +41,11 @@ const config = require('rc')('yun', {
   'quality': 320,
   'retry-timeout': 3, // 3 mins
   'retry-times': 3, // 3 times
-  'skip': true,
+  'skip-exists': true,
   'progress': true,
 })
 
-let argv = yargs.command(
+let argv = (yargs as yargs.Argv<CurrentArgv>).command(
   '$0 <url>',
   '网易云音乐 歌单/专辑 下载器',
   // builder
@@ -48,7 +59,7 @@ let argv = yargs.command(
         c: 'concurrency',
         f: 'format',
         q: 'quality',
-        s: 'skip',
+        s: 'skip-exists',
         p: 'progress',
       })
       .option({
@@ -83,7 +94,7 @@ let argv = yargs.command(
           default: 3,
         },
 
-        'skip': {
+        'skip-exists': {
           desc: '对于已存在文件且大小合适则跳过',
           type: 'boolean',
           default: true,
@@ -115,7 +126,7 @@ let {
   quality,
   retryTimeout,
   retryTimes,
-  skip: skipExists,
+  skipExists,
   progress,
 } = argv
 
@@ -127,16 +138,15 @@ format:         ${format}
 retry-timeout:  ${retryTimeout} (分钟)
 retry-times:    ${retryTimes} (次)
 quality:        ${quality}
-skip:           ${skipExists}
+skip-exists:    ${skipExists}
 progress:       ${progress}
 `)
 
 // process argv
-;(quality as number) *= 1000
+quality *= 1000
 retryTimeout = ms(`${retryTimeout} minutes`)
 
 async function main() {
-  url = <string>argv.url
   url = normalizeUrl(url)
   const html = await getHtml(url)
   const $ = cheerio.load(html, {
@@ -159,10 +169,10 @@ async function main() {
     song => {
       // 根据格式获取所需文件名
       const file = getFileName({
-        format: format,
-        song: song,
-        url: url,
-        name: name,
+        format,
+        song,
+        url,
+        name,
       })
 
       // 下载
